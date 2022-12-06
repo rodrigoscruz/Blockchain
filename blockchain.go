@@ -15,6 +15,13 @@ const (
 	MINING_REWARD     = 1.0
 )
 
+/*
+Blockchain struct
+timestamp: registra data e hora
+nonce: nó
+previousHash: Hash anterior
+transactions: O que é transacionado
+*/
 type Block struct {
 	timestamp    int64
 	nonce        int
@@ -22,6 +29,7 @@ type Block struct {
 	transactions []*Transaction
 }
 
+/*Function who create a Block*/
 func NewBlock(nonce int, previousHash [32]byte, transactions []*Transaction) *Block {
 	b := new(Block)
 	b.timestamp = time.Now().UnixNano()
@@ -31,6 +39,7 @@ func NewBlock(nonce int, previousHash [32]byte, transactions []*Transaction) *Bl
 	return b
 }
 
+/*Function who show blocks created*/
 func (b *Block) Print() {
 	fmt.Printf("timestamp       %d\n", b.timestamp)
 	fmt.Printf("nonce           %d\n", b.nonce)
@@ -40,11 +49,13 @@ func (b *Block) Print() {
 	}
 }
 
+/*Function who show blocks created*/
 func (b *Block) Hash() [32]byte {
 	m, _ := json.Marshal(b)
 	return sha256.Sum256([]byte(m))
 }
 
+/*Function who show blocks created*/
 func (b *Block) MarshalJSON() ([]byte, error) {
 	return json.Marshal(struct {
 		Timestamp    int64          `json:"timestamp"`
@@ -59,12 +70,14 @@ func (b *Block) MarshalJSON() ([]byte, error) {
 	})
 }
 
+/*Function who show blocks created*/
 type Blockchain struct {
 	transactionPool   []*Transaction
 	chain             []*Block
 	blockchainAddress string
 }
 
+/*Function who show blocks created*/
 func NewBlockchain(blockchainAddress string) *Blockchain {
 	b := &Block{}
 	bc := new(Blockchain)
@@ -73,6 +86,7 @@ func NewBlockchain(blockchainAddress string) *Blockchain {
 	return bc
 }
 
+/*Function who show blocks created*/
 func (bc *Blockchain) CreateBlock(nonce int, previousHash [32]byte) *Block {
 	b := NewBlock(nonce, previousHash, bc.transactionPool)
 	bc.chain = append(bc.chain, b)
@@ -80,10 +94,12 @@ func (bc *Blockchain) CreateBlock(nonce int, previousHash [32]byte) *Block {
 	return b
 }
 
+/*Function who show blocks created*/
 func (bc *Blockchain) LastBlock() *Block {
 	return bc.chain[len(bc.chain)-1]
 }
 
+/*Function who show blocks created*/
 func (bc *Blockchain) Print() {
 	for i, block := range bc.chain {
 		fmt.Printf("%s Chain %d %s\n", strings.Repeat("=", 25), i,
@@ -93,11 +109,13 @@ func (bc *Blockchain) Print() {
 	fmt.Printf("%s\n", strings.Repeat("*", 25))
 }
 
+/*Function who show blocks created*/
 func (bc *Blockchain) AddTransaction(sender string, recipient string, value float32) {
 	t := NewTransaction(sender, recipient, value)
 	bc.transactionPool = append(bc.transactionPool, t)
 }
 
+/*Function who show blocks created*/
 func (bc *Blockchain) CopyTransactionPool() []*Transaction {
 	transactions := make([]*Transaction, 0)
 	for _, t := range bc.transactionPool {
@@ -109,6 +127,7 @@ func (bc *Blockchain) CopyTransactionPool() []*Transaction {
 	return transactions
 }
 
+/*Function who show blocks created*/
 func (bc *Blockchain) ValidProof(nonce int, previousHash [32]byte, transactions []*Transaction, difficulty int) bool {
 	zeros := strings.Repeat("0", difficulty)
 	guessBlock := Block{0, nonce, previousHash, transactions}
@@ -116,6 +135,7 @@ func (bc *Blockchain) ValidProof(nonce int, previousHash [32]byte, transactions 
 	return guessHashStr[:difficulty] == zeros
 }
 
+/*Function who show blocks created*/
 func (bc *Blockchain) ProofOfWork() int {
 	transactions := bc.CopyTransactionPool()
 	previousHash := bc.LastBlock().Hash()
@@ -126,6 +146,7 @@ func (bc *Blockchain) ProofOfWork() int {
 	return nonce
 }
 
+/*Function who show blocks created*/
 func (bc *Blockchain) Mining() bool {
 	bc.AddTransaction(MINING_SENDER, bc.blockchainAddress, MINING_REWARD)
 	nonce := bc.ProofOfWork()
@@ -135,6 +156,7 @@ func (bc *Blockchain) Mining() bool {
 	return true
 }
 
+/*Function who show blocks created*/
 func (bc *Blockchain) CalculateTotalAmount(blockchainAddress string) float32 {
 	var totalAmount float32 = 0.0
 	for _, b := range bc.chain {
@@ -152,16 +174,19 @@ func (bc *Blockchain) CalculateTotalAmount(blockchainAddress string) float32 {
 	return totalAmount
 }
 
+/*Function who show blocks created*/
 type Transaction struct {
 	senderBlockchainAddress    string
 	recipientBlockchainAddress string
 	value                      float32
 }
 
+/*Function who show blocks created*/
 func NewTransaction(sender string, recipient string, value float32) *Transaction {
 	return &Transaction{sender, recipient, value}
 }
 
+/*Function who show blocks created*/
 func (t *Transaction) Print() {
 	fmt.Printf("%s\n", strings.Repeat("-", 40))
 	fmt.Printf(" sender_blockchain_address      %s\n", t.senderBlockchainAddress)
@@ -169,6 +194,7 @@ func (t *Transaction) Print() {
 	fmt.Printf(" value                          %.1f\n", t.value)
 }
 
+/*Function who show blocks created*/
 func (t *Transaction) MarshalJSON() ([]byte, error) {
 	return json.Marshal(struct {
 		Sender    string  `json:"sender_blockchain_address"`
@@ -181,10 +207,12 @@ func (t *Transaction) MarshalJSON() ([]byte, error) {
 	})
 }
 
+/*Function who show blocks created*/
 func init() {
 	log.SetPrefix("Blockchain: ")
 }
 
+/*Finally the "Main"*/
 func main() {
 	myBlockchainAddress := "my_blockchain_address"
 
